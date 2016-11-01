@@ -8,10 +8,14 @@
 
 import UIKit
 
-class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteButtonDatasource, RetweetButtonDatasource, TweetComposeViewControllerDatasource {
+protocol TweetViewContollerDatasource: class {
+    func tweet() -> Tweet?
+}
 
-    // Model
-    var tweet: Tweet?
+class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteButtonDatasource, RetweetButtonDatasource, TweetComposeViewControllerDatasource, RetweetButtonDelegate, FavouriteButtonDelegate {
+
+    // Model uses protocol TweetViewContollerDatasource
+    weak var datasource: TweetViewContollerDatasource?
     
     // Views
     @IBOutlet weak var profileImageView: UIImageView!
@@ -24,7 +28,7 @@ class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteBut
     @IBOutlet weak var favouriteCountLabel: UILabel!
     @IBOutlet weak var favouriteButton: FavouriteButton!
     @IBOutlet weak var replyButton: ReplyButton!
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,15 +36,11 @@ class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteBut
         navigationItem.title = "Tweet"
 
         retweetButton.datasource = self
+        retweetButton.delegate = self
         replyButton.datasource = self
         favouriteButton.datasource = self
-        
-        if let tweet = tweet {
-            favouriteButton.isSelected = tweet.favourited
-            retweetButton.isSelected = tweet.retweeted
-            retweetCountLabel.text = String(tweet.retweetCount)
-            favouriteCountLabel.text = String(tweet.favourtiesCount)
-        }
+        favouriteButton.delegate = self
+
         configureViews()
     }
 
@@ -50,11 +50,15 @@ class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteBut
     }
     
     func configureViews() {
-        if let tweet = tweet {
+        if let tweet = datasource?.tweet() {
             if let text = tweet.text {
                 tweetTextLabel.text = text
             }
-            
+            favouriteButton.isSelected = tweet.favourited
+            retweetButton.isSelected = tweet.retweeted
+            retweetCountLabel.text = String(tweet.retweetCount)
+            favouriteCountLabel.text = String(tweet.favourtiesCount)
+
             // Configure user contents
             if let user = tweet.user {
                 usernameLabel.text = user.name
@@ -75,24 +79,50 @@ class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteBut
 //MARK- protocols
     
     func replyToStatusID(_ sender: UIViewController) -> String? {
-        return tweetID(sender)
+        return getTweetIDString()
     }
     
-    func tweetID(_ sender: Any) -> String? {
-        if let tweet = tweet {
-            return tweet.idString
+    func replyToUsername(_ sender: UIViewController) -> String? {
+        if let screenname = datasource?.tweet()?.user?.screenname {
+            return "@" + screenname
         }
-        return nil
+        else { return nil }
+    }
+    
+    func tweetID(_ sender: UIButton) -> String? {
+        return getTweetIDString()
     }
  
     func parentVC(_ sender: UIButton) -> UIViewController {
         return self
     }
     
-    func replyToUsername(_ sender: UIViewController) -> String? {
-        if let screenname = tweet?.user?.screenname {
-            return "@" + screenname
+    func updateRetweetedStatus(_ sender: UIButton, to status: Bool) {
+        if let tweet = datasource?.tweet() {
+            tweet.retweeted = status
+            if status {
+                tweet.retweetCount += 1
+            } else { tweet.retweetCount -= 1 }
         }
-        else { return nil }
+        configureViews()
     }
+    
+    func updateFavouritedStatus(_ sender: UIButton, to status: Bool) {
+        if let tweet = datasource?.tweet() {
+            tweet.favourited = status
+            if status {
+                tweet.favourtiesCount += 1
+            } else { tweet.favourtiesCount -= 1 }
+        }
+        configureViews()
+    }
+    
+    // Helper method
+    func getTweetIDString() -> String? {
+        if let tweet = datasource?.tweet() {
+            return tweet.idString
+        }
+        return nil
+    }
+    
 }

@@ -8,8 +8,12 @@
 
 import UIKit
 
-protocol RetweetButtonDatasource:class {
-    func tweetID(_ sender: Any) -> String?
+protocol RetweetButtonDatasource: class {
+    func tweetID(_ sender: UIButton) -> String?
+}
+
+protocol RetweetButtonDelegate: class {
+    func updateRetweetedStatus(_ sender: UIButton, to status: Bool)
 }
 
 class RetweetButton: UIButton {
@@ -19,6 +23,7 @@ class RetweetButton: UIButton {
     private let actionType = "Retweeted"
 
     weak var datasource: RetweetButtonDatasource?
+    weak var delegate: RetweetButtonDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -46,12 +51,14 @@ class RetweetButton: UIButton {
             if isSelected {
                 TwitterSessionManager.sharedInstance.postRetweet(id: tweetID, completion: { (response:Any?) in
                     print(self.actionType)
+                    self.delegate?.updateRetweetedStatus(self, to: self.isSelected)
                     }, failure: { (error: Error) in
                         print("\(self.actionType) Error: \(error)")
                 })
             } else {
                 TwitterSessionManager.sharedInstance.postUnRetweet(id: tweetID, completion: { (response: Any?) in
                     print("Un-\(self.actionType)")
+                    self.delegate?.updateRetweetedStatus(self, to: self.isSelected)
                     }, failure: { (error: Error) in
                         print("\(self.actionType) Error: \(error)")
                 })

@@ -32,7 +32,7 @@ private let kTwitterSMParameterReplyToIDKey = "in_reply_to_status_id"
 
 private let kTwitterSMResourcePathTweet = "1.1/statuses/update.json"
 private let kTwitterSMParameterTweetKey = "status"
-private let kTwitterSMHomeTimelineParameters = ["count": "20", "exclude_replies": "false"]
+private let kTwitterSMHomeTimelineParameters = ["count": "20"]
 
 let notificationLogout = Notification.Name("logoutNotification")
 

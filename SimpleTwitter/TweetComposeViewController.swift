@@ -81,8 +81,10 @@ class TweetComposeViewController: UIViewController, UITextViewDelegate {
     @IBAction func sendButtonTapped(_ sender: UIBarButtonItem) {
         if let text = tweetTextView.text {
             let completionClosure = { (response: Any?) in
-                //Add tweet to something else
-//                let tweet = Tweet(dictionary: response as! NSDictionary)
+                //Notify a new tweet has been posted
+                let tweet = Tweet(dictionary: response as! NSDictionary)
+                NotificationCenter.default.post(name: notificationNewTweet, object: nil, userInfo: [notificationUserInfoTweetKey: tweet])
+
                 self.dismiss(animated: true, completion: { })
             }
             let errorClosure = { (error: Error) in

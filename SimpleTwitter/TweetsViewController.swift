@@ -11,9 +11,13 @@ import AFNetworking
 
 let kTweetsTableViewCellIdentifier = "TweetTableViewCell"
 let kTweetsComposeNavigationControllerName = "TweetNavigationController"
-class TweetsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+let notificationNewTweet = Notification.Name("newTweet")
+let notificationUserInfoTweetKey = "tweet"
+
+class TweetsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, TweetViewContollerDatasource {
     
     var tweets: [Tweet] = []
+    var currentSelectedIndex = -1
     let refreshControl = UIRefreshControl()
     
     @IBOutlet weak var tableView: UITableView!
@@ -34,22 +38,16 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.estimatedRowHeight = 50
         tableView.rowHeight = UITableViewAutomaticDimension
         
-        
         // load the model and views
         fetchTimeline()
+        
+        // Setup notification for new tweets (add to timeline without fetching from Network)
+        NotificationCenter.default.addObserver(self, selector: #selector(addNewTweet(notification:)), name: notificationNewTweet, object: nil)
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destinationVC = segue.destination
-        
-        if destinationVC.isKind(of: TweetViewController.classForCoder()) {
-            (destinationVC as! TweetViewController).tweet = tweets[(tableView.indexPathForSelectedRow?.row)!]
-        }
     }
     
 //MARK- Model
@@ -67,6 +65,13 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+        
+        if let destinationVC = segue.destination as? TweetViewController {
+            destinationVC.datasource = self
+        }
+    }
 // MARK: - tableView methods
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -104,10 +109,19 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        currentSelectedIndex = indexPath.row
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-
+// Mark: Protocol methods
+    func tweet() -> Tweet? {
+        if currentSelectedIndex >= 0
+        {
+            return tweets[currentSelectedIndex]
+        }
+        return nil
+    }
+    
 // MARK: Actions
     @IBAction func logoutButtonTapped(_ sender: UIBarButtonItem) {
         TwitterSessionManager.sharedInstance.logout()
@@ -115,5 +129,12 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     
     @IBAction func composeButtonTapped(_ sender: UIBarButtonItem) {
         TweetComposeViewController.present(from: self)
+    }
+    
+// Mark: Notifications
+    func addNewTweet(notification: NSNotification) {
+        let tweet = notification.userInfo?["tweet"] as! Tweet
+        tweets.insert(tweet, at: 0)
+        tableView.reloadData()
     }
 }

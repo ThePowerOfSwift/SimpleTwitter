@@ -13,7 +13,10 @@ import UIKit
 // also, tweet status is not updated in current model (i.e. after retweet, model becomes stale without refresh)
 
 protocol FavouriteButtonDatasource: class {
-    func tweetID(_ sender: Any) -> String?
+    func tweetID(_ sender: UIButton) -> String?
+}
+protocol FavouriteButtonDelegate: class {
+    func updateFavouritedStatus(_ sender: UIButton, to status: Bool)
 }
 
 class FavouriteButton: UIButton {
@@ -23,6 +26,7 @@ class FavouriteButton: UIButton {
     private let actionType = "Favourited"
     
     weak var datasource: FavouriteButtonDatasource?
+    weak var delegate: FavouriteButtonDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -50,12 +54,14 @@ class FavouriteButton: UIButton {
             if isSelected {
                 TwitterSessionManager.sharedInstance.postFavourite(id: tweetID, completion: { (response:Any?) in
                     print(self.actionType)
+                    self.delegate?.updateFavouritedStatus(self, to: self.isSelected)
                     }, failure: { (error: Error) in
                         print("\(self.actionType) Error: \(error)")
                 })
             } else {
                 TwitterSessionManager.sharedInstance.postUnFavourite(id: tweetID, completion: { (response:Any?) in
                     print("Un-\(self.actionType)")
+                    self.delegate?.updateFavouritedStatus(self, to: self.isSelected)
                     }, failure: { (error: Error) in
                         print("\(self.actionType) Error: \(error)")
                 })
