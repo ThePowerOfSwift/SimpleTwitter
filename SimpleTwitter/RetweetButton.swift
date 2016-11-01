@@ -9,7 +9,7 @@
 import UIKit
 
 protocol RetweetButtonDatasource:class {
-    func tweetID() -> String?
+    func tweetID(_ sender: Any) -> String?
 }
 
 class RetweetButton: UIButton {
@@ -42,7 +42,7 @@ class RetweetButton: UIButton {
         isSelected = !isSelected
 
         // Tweet is set so can go ahead and tweet or untweet
-        if let tweetID = datasource?.tweetID() {
+        if let tweetID = datasource?.tweetID(self) {
             if isSelected {
                 TwitterSessionManager.sharedInstance.postRetweet(id: tweetID, completion: { (response:Any?) in
                     print(self.actionType)

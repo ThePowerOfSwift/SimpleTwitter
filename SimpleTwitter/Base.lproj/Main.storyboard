@@ -142,7 +142,7 @@
             </objects>
             <point key="canvasLocation" x="2010.4000000000001" y="145.27736131934034"/>
         </scene>
-        <!--Compose Tweet-->
+        <!--Compose-->
         <scene sceneID="fvu-l9-9I8">
             <objects>
                 <viewController id="I0o-fe-RzO" customClass="TweetComposeViewController" customModule="SimpleTwitter" customModuleProvider="target" sceneMemberID="viewController">
@@ -176,6 +176,13 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="140" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KcV-zU-Kbi">
+                                <frame key="frameInset" minX="317" minY="74" width="42" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -193,13 +200,13 @@
                             <constraint firstItem="jp4-DK-Kjf" firstAttribute="leading" secondItem="erU-Ii-GZw" secondAttribute="leading" constant="10" id="hfV-PQ-qZl"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Compose Tweet" id="9ft-nf-TTY">
+                    <navigationItem key="navigationItem" title="Compose" id="9ft-nf-TTY">
                         <barButtonItem key="leftBarButtonItem" title="Cancel" id="gjn-tE-hgT">
                             <connections>
                                 <action selector="cancelButtonTapped:" destination="I0o-fe-RzO" id="eOJ-qE-Yrl"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="Send" id="T5I-Zk-fst">
+                        <barButtonItem key="rightBarButtonItem" title="Tweet" id="T5I-Zk-fst">
                             <connections>
                                 <action selector="sendButtonTapped:" destination="I0o-fe-RzO" id="eBu-95-Tcj"/>
                             </connections>
@@ -212,6 +219,7 @@
                         <outlet property="sendButton" destination="T5I-Zk-fst" id="M60-r8-Gkg"/>
                         <outlet property="tweetTextView" destination="jp4-DK-Kjf" id="8ij-TY-61M"/>
                         <outlet property="usernameLabel" destination="JV5-Cy-vUd" id="mtm-1n-oH3"/>
+                        <outlet property="wordCountLabel" destination="KcV-zU-Kbi" id="hvG-JB-ieH"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bG5-Rj-otb" userLabel="First Responder" sceneMemberID="firstResponder"/>

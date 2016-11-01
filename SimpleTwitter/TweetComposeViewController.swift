@@ -10,11 +10,11 @@ import UIKit
 
 protocol TweetComposeViewControllerDatasource: class {
     // The ID of tweet/status you are replying to
-    func replyToStatusID()-> String?
-    func replyToUsername() -> String?
+    func replyToStatusID(_ sender: UIViewController)-> String?
+    func replyToUsername(_ sender: UIViewController) -> String?
 }
 
-class TweetComposeViewController: UIViewController {
+class TweetComposeViewController: UIViewController, UITextViewDelegate {
     
     weak var datasource: TweetComposeViewControllerDatasource?
     
@@ -24,6 +24,7 @@ class TweetComposeViewController: UIViewController {
     @IBOutlet weak var tweetTextView: UITextView!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var screennameLabel: UILabel!
+    @IBOutlet weak var wordCountLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,11 +36,16 @@ class TweetComposeViewController: UIViewController {
             profileImageView.setImageWith(user.profileURL!)
         }
         
+        tweetTextView.delegate = self
         tweetTextView.textAlignment = .left
-        tweetTextView.text = ""
         tweetTextView.becomeFirstResponder()
         
-        print(datasource?.replyToStatusID())
+        if let referencedUsername = datasource?.replyToUsername(self) {
+            tweetTextView.text = referencedUsername + " "
+        } else {
+            tweetTextView.text = ""
+        }
+        updateWordCount()
     }
 
     override func didReceiveMemoryWarning() {
@@ -47,13 +53,16 @@ class TweetComposeViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    // Present this VC from another VC
+    func updateWordCount() {
+        wordCountLabel.text = String(tweetTextView.text.characters.count)
+    }
+    
+// Present this VC from another VC
     class func present(from: UIViewController) {
         let storyboard = UIStoryboard.init(name: kLoginMainStoryboardName, bundle: nil)
         let destinationVC = storyboard.instantiateViewController(withIdentifier: kTweetsComposeNavigationControllerName) as! UINavigationController
         
         if let composeVC = destinationVC.topViewController as? TweetComposeViewController {
-            
             // Hook datasource if implements protocol TweetComposeViewControllerDatasource
             if let datasource = from as? TweetComposeViewControllerDatasource {
                 print("Hooked compose VC datasource")
@@ -71,7 +80,9 @@ class TweetComposeViewController: UIViewController {
     
     @IBAction func sendButtonTapped(_ sender: UIBarButtonItem) {
         if let text = tweetTextView.text {
-            let completionClosure = {
+            let completionClosure = { (response: Any?) in
+                //Add tweet to something else
+//                let tweet = Tweet(dictionary: response as! NSDictionary)
                 self.dismiss(animated: true, completion: { })
             }
             let errorClosure = { (error: Error) in
@@ -81,23 +92,13 @@ class TweetComposeViewController: UIViewController {
             
             // Reply to tweet (i.e. a datasource exists)
             if let datasource = datasource {
-                if let replyToStatusID = datasource.replyToStatusID() {
-                    var finalText = text
-                    // must include @username , where username is the author of the referenced Tweet, within the update
-                    if let referencedUsername = datasource.replyToUsername() {
-                        // find the reference first
-                        // Not referenced, so throw it in front
-                        if text.range(of: referencedUsername) == nil {
-                            finalText = referencedUsername + " " + finalText
-                        }
-                        
-                        TwitterSessionManager.sharedInstance.postReply(text: finalText, to: replyToStatusID, completion: { (response: Any?) in
+                if let replyToStatusID = datasource.replyToStatusID(self) {
+                        TwitterSessionManager.sharedInstance.postReply(text: text, to: replyToStatusID, completion: { (response: Any?) in
                             print("Tweeted reply!")
-                            completionClosure()
+                            completionClosure(response)
                             }, failure: { (error: Error) in
                                 errorClosure(error)
                         })
-                    }
                 } else {
                     print("Error replying to status: there is no ID from datasource.  Send Failed.")
                 }
@@ -106,11 +107,17 @@ class TweetComposeViewController: UIViewController {
             else {
                 TwitterSessionManager.sharedInstance.postTweet(text: text, completion: { (response: Any?) in
                     print("Tweeted!")
-                    completionClosure()
+                    completionClosure(response)
                 }) { (error:Error) in
                     errorClosure(error)
                 }
             }
         }
+    }
+    
+// MARK Delegate methods
+    
+    func textViewDidChange(_ textView: UITextView) {
+        updateWordCount()
     }
 }

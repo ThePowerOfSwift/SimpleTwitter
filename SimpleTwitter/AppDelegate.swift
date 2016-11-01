@@ -34,7 +34,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             print("No current user logged in yet")
         }
         
-        
         // Add notification send user back to login screen after logout
         NotificationCenter.default.addObserver(self, selector: #selector(presentLoginViewController), name: notificationLogout, object: nil)
         }

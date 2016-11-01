@@ -74,22 +74,22 @@ class TweetViewController: UIViewController, ReplyButtonDatasource, FavouriteBut
     
 //MARK- protocols
     
-    func replyToStatusID() -> String? {
-        return tweetID()
+    func replyToStatusID(_ sender: UIViewController) -> String? {
+        return tweetID(sender)
     }
     
-    func tweetID() -> String? {
+    func tweetID(_ sender: Any) -> String? {
         if let tweet = tweet {
             return tweet.idString
         }
         return nil
     }
  
-    func parentVC() -> UIViewController {
+    func parentVC(_ sender: UIButton) -> UIViewController {
         return self
     }
     
-    func replyToUsername() -> String? {
+    func replyToUsername(_ sender: UIViewController) -> String? {
         if let screenname = tweet?.user?.screenname {
             return "@" + screenname
         }

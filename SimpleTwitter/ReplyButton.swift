@@ -9,7 +9,7 @@
 import UIKit
 
 protocol ReplyButtonDatasource: class {
-    func parentVC() -> UIViewController
+    func parentVC(_ sender: UIButton) -> UIViewController
 }
 
 class ReplyButton: UIButton {
@@ -34,11 +34,6 @@ class ReplyButton: UIButton {
     }
     
     func tapped() {
-        // Compose a reply
-        TweetComposeViewController.present(from: (datasource?.parentVC())!)
-//        if let tweetID = datasource?.tweetID() {
-//            print(tweetID)
-//        }
-        
+        TweetComposeViewController.present(from: (datasource?.parentVC(self))!)
     }
 }

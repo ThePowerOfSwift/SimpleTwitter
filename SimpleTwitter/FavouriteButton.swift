@@ -13,7 +13,7 @@ import UIKit
 // also, tweet status is not updated in current model (i.e. after retweet, model becomes stale without refresh)
 
 protocol FavouriteButtonDatasource: class {
-    func tweetID() -> String?
+    func tweetID(_ sender: Any) -> String?
 }
 
 class FavouriteButton: UIButton {
@@ -46,7 +46,7 @@ class FavouriteButton: UIButton {
         isSelected = !isSelected
         
         // Tweet is set so can go ahead and tweet or untweet
-        if let tweetID = datasource?.tweetID() {
+        if let tweetID = datasource?.tweetID(self) {
             if isSelected {
                 TwitterSessionManager.sharedInstance.postFavourite(id: tweetID, completion: { (response:Any?) in
                     print(self.actionType)
